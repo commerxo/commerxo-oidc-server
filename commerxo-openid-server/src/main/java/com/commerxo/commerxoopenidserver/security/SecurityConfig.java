@@ -1,5 +1,8 @@
 package com.commerxo.commerxoopenidserver.security;
 
+import com.nimbusds.jose.jwk.JWKSet;
+import com.nimbusds.jose.jwk.RSAKey;
+import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
 import org.springframework.context.annotation.Bean;
@@ -24,6 +27,7 @@ import org.springframework.security.oauth2.core.oidc.OidcScopes;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+import org.springframework.security.oauth2.server.authorization.OAuth2TokenType;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClientRepository;
@@ -39,9 +43,14 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
+import java.security.KeyPair;
+import java.security.KeyPairGenerator;
+import java.security.interfaces.RSAPrivateKey;
+import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.UUID;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
 
@@ -64,13 +73,11 @@ public class SecurityConfig {
         OAuth2AuthorizationServerConfiguration.applyDefaultSecurity(http);
         OAuth2AuthorizationServerConfigurer authorizationServerConfigurer = http.getConfigurer(OAuth2AuthorizationServerConfigurer.class);
 
-        http
-                .authorizeHttpRequests((authorizeRequest) ->
-                        authorizeRequest.requestMatchers(HttpMethod.POST,"/oauth2/jwks").hasAnyAuthority("SCOPE_Keys.write")
-                );
+
 
         authorizationServerConfigurer
                 .authorizationServerSettings(authorizationServerSettings())
+                .tokenGenerator(tokenGenerator())
                 .oidc(Customizer.withDefaults());
 
         http
@@ -170,42 +177,50 @@ public class SecurityConfig {
         return new InMemoryUserDetailsManager(userDetails);
     }
 
-//    @Bean
-//    public JWKSource<SecurityContext> jwkSource() {
-//        KeyPair keyPair = generateRsaKey();
-//        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-//        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-//        RSAKey rsaKey = new RSAKey.Builder(publicKey)
-//                .privateKey(privateKey)
-//                .keyID(UUID.randomUUID().toString())
-//                .build();
-//        JWKSet jwkSet = new JWKSet(rsaKey);
-//        return new ImmutableJWKSet<>(jwkSet);
-//    }
-//
-//    private static KeyPair generateRsaKey() {
-//        KeyPair keyPair;
-//        try {
-//            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
-//            keyPairGenerator.initialize(2048);
-//            keyPair = keyPairGenerator.generateKeyPair();
-//        }
-//        catch (Exception ex) {
-//            throw new IllegalStateException(ex);
-//        }
-//        return keyPair;
-//    }
     @Bean
-    NimbusJwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
-        return new NimbusJwtEncoder(jwkSource);
+    public JWKSource<SecurityContext> jwkSource() {
+        KeyPair keyPair = generateRsaKey();
+        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
+        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
+        RSAKey rsaKey = new RSAKey.Builder(publicKey)
+                .privateKey(privateKey)
+                .keyID(UUID.randomUUID().toString())
+                .build();
+        JWKSet jwkSet = new JWKSet(rsaKey);
+        return new ImmutableJWKSet<>(jwkSet);
+    }
+
+    private static KeyPair generateRsaKey() {
+        KeyPair keyPair;
+        try {
+            KeyPairGenerator keyPairGenerator = KeyPairGenerator.getInstance("RSA");
+            keyPairGenerator.initialize(2048);
+            keyPair = keyPairGenerator.generateKeyPair();
+        }
+        catch (Exception ex) {
+            throw new IllegalStateException(ex);
+        }
+        return keyPair;
     }
 
     @Bean
-    JwtGenerator jwtGenerator(JwtEncoder jwtEncoder, OAuth2TokenCustomizer<JwtEncodingContext>  customizer) {
-        JwtGenerator generator = new JwtGenerator(jwtEncoder);
-        generator.setJwtCustomizer(customizer);
+    public OAuth2TokenGenerator<?> tokenGenerator(){
+        JwtEncoder jwtEncoder = new NimbusJwtEncoder(jwkSource());
+        JwtGenerator jwtGenerator = new JwtGenerator(jwtEncoder);
+        jwtGenerator.setJwtCustomizer(jwtCustomizer());
+        OAuth2AccessTokenGenerator accessTokenGenerator = new OAuth2AccessTokenGenerator();
+        OAuth2RefreshTokenGenerator refreshTokenGenerator = new OAuth2RefreshTokenGenerator();
+        return new DelegatingOAuth2TokenGenerator(jwtGenerator, accessTokenGenerator, refreshTokenGenerator);
+    }
 
-        return generator;
+    @Bean
+    public OAuth2TokenCustomizer<JwtEncodingContext> jwtCustomizer(){
+        return context -> {
+            if(context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)){
+                context.getClaims()
+                        .claim("authority","FULL");
+            }
+        };
     }
 
     @Bean
