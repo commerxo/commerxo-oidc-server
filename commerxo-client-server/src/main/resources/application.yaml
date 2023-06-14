@@ -1,0 +1,21 @@
+logging:
+  level:
+    root: DEBUG
+  org:
+    springframework:
+      security: DEBUG
+
+
+spring:
+  profiles:
+    active: dev
+  cloud:
+    config:
+      label: develop
+      profile: dev
+  config:
+    import: optional:configserver:http://localhost:8888
+
+server:
+  address: 127.0.0.5
+

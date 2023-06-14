@@ -1,0 +1,26 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: commerxo-config-server
+  cloud:
+    config:
+      profile: dev
+      server:
+        git:
+          uri: https://github.com/commerxo/cloud-config.git
+          clone-on-start: true
+          default-label: develop
+          search-paths:
+            - commerxo-auth-config
+            - commerxo-blog-service
+
+  profiles:
+    active: dev
+
+# Actuator Config
+
+#management.endpoints.web.exposure.include = *
+#management.endpoints.web.exposure.exclude = loggers
+#management.endpoint.shutdown.enabled = true

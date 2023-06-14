@@ -1,0 +1,22 @@
+server:
+  port: 7070
+  address: 127.0.0.6
+
+#spring:
+#  security:
+#    oauth2:
+#      resourceserver:
+#        jwt:
+#          jwk-set-uri: http://localhost:9090/oauth2/jwks
+#          issuer-uri: http://localhost:9090
+
+logging:
+  level:
+    root: DEBUG
+  org:
+    hibernate:
+      SQL: DEBUG
+      type: TRACE
+    springframework:
+      security: DEBUG
+      web: DEBUG
