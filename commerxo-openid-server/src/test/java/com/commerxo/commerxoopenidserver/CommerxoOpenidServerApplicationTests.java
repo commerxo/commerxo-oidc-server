@@ -9,5 +9,4 @@ class CommerxoOpenidServerApplicationTests {
 	@Test
 	void contextLoads() {
 	}
-
 }
