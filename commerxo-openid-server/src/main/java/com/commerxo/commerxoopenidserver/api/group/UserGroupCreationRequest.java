@@ -2,7 +2,7 @@ package com.commerxo.commerxoopenidserver.api.group;
 
 import java.util.Set;
 
-public class GroupRequest {
+public class UserGroupCreationRequest {
 
     private String groupName;
     private String description;
@@ -31,5 +31,4 @@ public class GroupRequest {
     public void setAuthorities(Set<String> authorities) {
         this.authorities = authorities;
     }
-
 }
