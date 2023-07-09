@@ -2,13 +2,15 @@ package com.commerxo.commerxoopenidserver.common;
 
 import org.springframework.http.HttpStatus;
 
+import java.util.Date;
+
 
 public class APIResponse<T>  {
 
+    private Date timestamp;
     private String message;
     private int status;
     private T data;
-
 
     public APIResponse(HttpStatus status, T data){
         this(status, data, null);
@@ -19,9 +21,18 @@ public class APIResponse<T>  {
     }
 
     public APIResponse(HttpStatus status, T data, String message){
-      this.status = status.value();
-      this.message = message;
-      this.data = data;
+        this.timestamp = new Date();
+        this.status = status.value();
+        this.message = message;
+        this.data = data;
+    }
+
+    public Date getTimestamp() {
+        return timestamp;
+    }
+
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     public String getMessage() {

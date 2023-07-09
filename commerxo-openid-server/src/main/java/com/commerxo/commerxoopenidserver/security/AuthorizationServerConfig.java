@@ -49,6 +49,7 @@ import java.security.interfaces.RSAPublicKey;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
+import java.util.Arrays;
 import java.util.UUID;
 
 import static org.springframework.security.web.util.matcher.AntPathRequestMatcher.antMatcher;
@@ -94,8 +95,8 @@ public class AuthorizationServerConfig {
         http
                 .exceptionHandling((exception) ->
                         exception.defaultAuthenticationEntryPointFor(
-                                new LoginUrlAuthenticationEntryPoint("/login"),
-                                new MediaTypeRequestMatcher(MediaType.TEXT_HTML)
+                                new LoginUrlAuthenticationEntryPoint("/login1"),
+                                new MediaTypeRequestMatcher(MediaType.ALL)
                         )
                 );
 
@@ -132,6 +133,7 @@ public class AuthorizationServerConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .scope(OidcScopes.OPENID)
                 .scope(OidcScopes.PROFILE)
+                .scopes(scopes -> scopes.addAll(Arrays.asList("blog:read", "blog:write", "blog:delete")))
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .redirectUri("http://127.0.0.5:8080/login/oauth2/code/client")
@@ -152,8 +154,29 @@ public class AuthorizationServerConfig {
                                 .refreshTokenTimeToLive(Duration.ofSeconds(3600))
                                 .build()
                 ).build();
+
+        RegisteredClient swaggerClient = RegisteredClient.withId("swagger")
+                .clientId("swagger")
+                .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
+                .scope(OidcScopes.OPENID)
+                .scope(OidcScopes.PROFILE)
+                .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                .redirectUri("http://127.0.0.6:7070/swagger-ui/oauth2-redirect.html")
+                .clientSettings(ClientSettings.builder()
+                        .requireProofKey(true)
+                        .requireAuthorizationConsent(true)
+                        .build()
+                )
+                .tokenSettings(TokenSettings.builder()
+                                .reuseRefreshTokens(true)
+                                .accessTokenFormat(OAuth2TokenFormat.SELF_CONTAINED)
+                                .accessTokenTimeToLive(Duration.ofSeconds(3600))
+                                .refreshTokenTimeToLive(Duration.ofSeconds(3600))
+                                .build()
+                ).build();
         JdbcRegisteredClientRepository clientRepository = new JdbcRegisteredClientRepository(jdbcTemplate);
         clientRepository.save(registeredClient);
+        clientRepository.save(swaggerClient);
         return new JdbcRegisteredClientRepository(jdbcTemplate);
     }
 

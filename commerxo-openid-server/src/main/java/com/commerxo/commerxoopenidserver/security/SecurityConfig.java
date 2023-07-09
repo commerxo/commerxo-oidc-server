@@ -1,5 +1,7 @@
 package com.commerxo.commerxoopenidserver.security;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.annotation.Order;
@@ -7,7 +9,6 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.security.authentication.AbstractAuthenticationToken;
 import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
-import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -43,22 +44,25 @@ public class SecurityConfig {
     public SecurityFilterChain defaultSecurityFilter(HttpSecurity http) throws Exception{
         http
                 .authorizeHttpRequests((authorize) -> {
-                    authorize.requestMatchers("/login", "/error**", "/actuator/**","/**").permitAll();
+                    authorize.requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll();
+                    authorize.requestMatchers("/login1", "/error**", "/actuator/**", "/**").permitAll();
                     authorize.anyRequest().authenticated();
-                });
-
-        http
+                })
                 .csrf(AbstractHttpConfigurer::disable)
                 .oauth2ResourceServer(oauth2->
                         oauth2.jwt(jwtConfigurer ->
                                 jwtConfigurer
                                         .authenticationManager(providerManager())
                         )
-                );
-
-        http
+                )
+                .exceptionHandling( exception ->
+                        exception.authenticationEntryPoint(
+                                (request, response, authException) -> response.sendError(HttpServletResponse.SC_UNAUTHORIZED))
+                )
                 .authenticationManager(providerManager())
-                .formLogin(Customizer.withDefaults());
+                .formLogin(login ->
+                        login.loginPage("/login1").permitAll()
+                );
 
         return http.build();
     }

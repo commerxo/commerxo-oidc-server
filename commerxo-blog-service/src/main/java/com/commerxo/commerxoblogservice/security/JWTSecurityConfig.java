@@ -1,5 +1,7 @@
 package com.commerxo.commerxoblogservice.security;
 
+import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.boot.autoconfigure.security.servlet.PathRequest;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.convert.converter.Converter;
@@ -16,6 +18,7 @@ import org.springframework.security.oauth2.server.resource.authentication.Delega
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
 
 import java.util.Collection;
 
@@ -29,21 +32,23 @@ public class JWTSecurityConfig {
 
         http
                 .csrf(AbstractHttpConfigurer::disable)
-                .sessionManagement(session ->
-                        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-                );
-
-        http
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+                //
                 .authorizeHttpRequests(authz ->
                         authz
-                                .requestMatchers(HttpMethod.GET, "/**").hasAuthority("ROLE_ADMIN")
-                                .requestMatchers(HttpMethod.POST, "/**").permitAll()
-                                .anyRequest().authenticated()
-                );
-
-        http
+                                .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                                .requestMatchers( "/**").permitAll()
+                                .anyRequest().authenticated())
+                //
                 .oauth2ResourceServer(oauth2->
-                        oauth2.jwt(jwtConfigurer -> jwtConfigurer.jwtAuthenticationConverter(getJwtAuthenticationConverter())
+                        oauth2.jwt(jwtConfigurer ->
+                                jwtConfigurer.jwtAuthenticationConverter(getJwtAuthenticationConverter()
+                                )
+                        ))
+                //
+                .exceptionHandling(exception ->
+                        exception.authenticationEntryPoint((request, response, authException) ->
+                                        response.sendError(HttpServletResponse.SC_UNAUTHORIZED)
                         )
                 );
 

@@ -18,6 +18,7 @@ public class OAuth2TokenJwtCustomizer {
             if(context.getTokenType().equals(OAuth2TokenType.ACCESS_TOKEN)){
                 context.getClaims()
                         .claim("roles", List.of("FULL","ADMIN"));
+                // Return token based on client and assign roles and scopes.
             }
             if(context.getTokenType().getValue().equals(OidcParameterNames.ID_TOKEN)){
                 context.getClaims()

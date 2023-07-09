@@ -54,7 +54,7 @@ public class SecurityConfig {
                 .tokenUri("http://localhost:9090/oauth2/token")
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-                .scope(Set.of("openid", "profile"))
+                .scope(Set.of("openid", "profile","blog:read", "blog:write", "blog:delete"))
                 .issuerUri("http://localhost:9090")
                 .jwkSetUri("http://localhost:9090/oauth2/jwks")
                 .build();

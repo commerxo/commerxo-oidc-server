@@ -12,7 +12,6 @@ public class APIResponse<T>  {
     private int status;
     private T data;
 
-
     public APIResponse(HttpStatus status, T data){
         this(status, data, null);
     }

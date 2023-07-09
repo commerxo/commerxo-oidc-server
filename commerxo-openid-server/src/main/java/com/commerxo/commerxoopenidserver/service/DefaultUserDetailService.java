@@ -7,6 +7,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 @Service
 public class DefaultUserDetailService implements UserDetailsService {
@@ -25,11 +26,10 @@ public class DefaultUserDetailService implements UserDetailsService {
         if(user == null)
             throw new UsernameNotFoundException("User does not exist with Username ==> " + username);
 
-        return UserPrincipal.buildWithId(user.getUuid())
+        return UserPrincipal.buildWithId(user.getId())
                 .username(user.getUsername())
                 .emailId(user.getEmailId())
                 .enabled(user.isEnabled())
-                .authorities(user.getGrantedAuthorities())
                 .accountNonExpired(user.isAccountNonExpired())
                 .accountNonLocked(user.isAccountNonLocked())
                 .credentialsExpired(user.isCredentialsNonExpired())

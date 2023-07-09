@@ -9,7 +9,9 @@ public interface TagService {
 
     APIResponse<Tag> save(Tag tag);
 
-    void remove(Tag tag);
+    APIResponse<Tag> getByTagName(String tagName);
+
+    APIResponse<Tag> remove(String tagName);
 
     APIResponse<List<Tag>> getAllTags();
 

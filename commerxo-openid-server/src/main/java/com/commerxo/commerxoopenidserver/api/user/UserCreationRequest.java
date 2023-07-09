@@ -3,6 +3,7 @@ package com.commerxo.commerxoopenidserver.api.user;
 import com.commerxo.commerxoopenidserver.domain.User;
 
 import java.time.Instant;
+import java.util.Date;
 
 public class UserCreationRequest {
 
@@ -36,7 +37,7 @@ public class UserCreationRequest {
 
     public static User mapToEntity(UserCreationRequest request){
         User user = new User();
-        user.setCreatedAt(Instant.now());
+        user.setCreatedAt(new Date());
         user.setUsername(request.getUsername());
         user.setPassword(request.getPassword());
         user.setEmailId(request.getEmailId());

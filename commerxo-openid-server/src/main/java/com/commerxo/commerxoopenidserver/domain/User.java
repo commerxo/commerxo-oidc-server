@@ -1,12 +1,13 @@
 package com.commerxo.commerxoopenidserver.domain;
 
-import com.commerxo.commerxoopenidserver.domain.converter.InstantStringConverter;
 import com.commerxo.commerxoopenidserver.domain.converter.SimpleGrantedAuthorityStringConverter;
+import com.fasterxml.jackson.annotation.JsonIdentityInfo;
+import com.fasterxml.jackson.annotation.ObjectIdGenerators;
 import jakarta.persistence.*;
 import org.hibernate.annotations.UuidGenerator;
 import org.springframework.security.core.GrantedAuthority;
 
-import java.time.Instant;
+import java.util.Date;
 import java.util.Set;
 
 
@@ -18,42 +19,49 @@ import java.util.Set;
                 columnNames = {"username"}
         )
 )
+@JsonIdentityInfo(
+        generator = ObjectIdGenerators.PropertyGenerator.class,
+        property = "id"
+)
 public class User {
 
-    private String uuid;
-    private Instant createdAt;
+    private String id;
+    private Date createdAt;
     private String username;
     private String password;
+    private String firstName;
+    private String middleName;
+    private String lastName;
     private String emailId;
     private String phoneNo;
-    private boolean isEnabled;
-    private boolean isAccountNonExpired;
-    private boolean isAccountNonLocked;
-    private boolean isCredentialsNonExpired;
-    private Set<GrantedAuthority> grantedAuthorities;
+    private boolean enabled =  false;
+    private boolean accountNonExpired =  false;
+    private boolean accountNonLocked =  false;
+    private boolean credentialsNonExpired =  false;
+    private Set<Role> roles;
+    private Set<UserGroup> userGroups;
 
     @Id
     @UuidGenerator
     @Column(name = "user_id")
-    public String getUuid() {
-        return uuid;
+    public String getId() {
+        return id;
     }
 
-    public void setUuid(String uuid) {
-        this.uuid = uuid;
+    public void setId(String id) {
+        this.id = id;
     }
 
     @Column(name = "created_at")
-    @Convert(converter = InstantStringConverter.class)
-    public Instant getCreatedAt() {
+    public Date getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Instant createdAt) {
+    public void setCreatedAt(Date createdAt) {
         this.createdAt = createdAt;
     }
 
-    @Column(name = "username", unique = true)
+    @Column(name = "username", unique = true, nullable = false)
     public String getUsername() {
         return username;
     }
@@ -62,16 +70,43 @@ public class User {
         this.username = username;
     }
 
-    @Column(name = "password")
+    @Column(name = "password", nullable = false)
     public String getPassword() {
-        return null;
+        return password;
     }
 
     public void setPassword(String password) {
         this.password = password;
     }
 
-    @Column(name = "email_id")
+    @Column(name = "first_name", length = 30)
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    @Column(name = "middle_name", length = 30)
+    public String getMiddleName() {
+        return middleName;
+    }
+
+    public void setMiddleName(String middleName) {
+        this.middleName = middleName;
+    }
+
+    @Column(name = "last_name", length = 30)
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    @Column(name = "email_id", nullable = false)
     public String getEmailId() {
         return emailId;
     }
@@ -89,69 +124,85 @@ public class User {
         this.phoneNo = phoneNo;
     }
 
-    @CollectionTable(
-            name = "user_authority",
-            joinColumns = @JoinColumn(name = "user_id")
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.ALL
+            })
+    @JoinTable(
+            name = "user_role",
+            joinColumns = {
+                    @JoinColumn(name = "user_id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "role_id")
+            }
     )
-    @ElementCollection(fetch = FetchType.EAGER)
-    @Column(name = "authority")
-    @Convert(converter = SimpleGrantedAuthorityStringConverter.class)
-    public Set<GrantedAuthority> getGrantedAuthorities() {
-        return grantedAuthorities;
+    public Set<Role> getRoles() {
+        return roles;
     }
 
-    public void setGrantedAuthorities(Set<GrantedAuthority> grantedAuthorities) {
-        this.grantedAuthorities = grantedAuthorities;
+    public void setRoles(Set<Role> roles) {
+        this.roles = roles;
     }
 
+    @ManyToMany(
+            fetch = FetchType.LAZY,
+            cascade = {
+                    CascadeType.ALL
+            })
+    @JoinTable(
+            name = "user_auth_group",
+            joinColumns = {
+                    @JoinColumn(name = "user_id")
+            },
+            inverseJoinColumns = {
+                    @JoinColumn(name = "group_id")
+            }
+    )
+//    @JsonManagedReference
+    public Set<UserGroup> getUserGroups() {
+        return userGroups;
+    }
 
-    @Column(name = "account_non_expired")
+    public void setUserGroups(Set<UserGroup> userGroups) {
+        this.userGroups = userGroups;
+    }
+
+    @Column(name = "account_non_expired",nullable = false)
     public boolean isAccountNonExpired() {
-        return false;
+        return accountNonExpired;
     }
 
     public void setAccountNonExpired(boolean accountNonExpired) {
-        isAccountNonExpired = accountNonExpired;
+        this.accountNonExpired = accountNonExpired;
     }
 
-    @Column(name = "account_non_locked")
+    @Column(name = "account_non_locked", nullable = false)
     public boolean isAccountNonLocked() {
-        return false;
+        return accountNonLocked;
     }
 
     public void setAccountNonLocked(boolean accountNonLocked) {
-        isAccountNonLocked = accountNonLocked;
+        this.accountNonLocked = accountNonLocked;
     }
 
-    @Column(name = "credential_non_expired")
+    @Column(name = "credential_non_expired", nullable = false)
     public boolean isCredentialsNonExpired() {
-        return false;
+        return credentialsNonExpired;
     }
 
     public void setCredentialsNonExpired(boolean credentialsNonExpired) {
-        isCredentialsNonExpired = credentialsNonExpired;
+        this.credentialsNonExpired = credentialsNonExpired;
     }
 
-    @Column(name = "enabled")
+    @Column(name = "enabled", nullable = false)
     public boolean isEnabled() {
-        return false;
+        return enabled;
     }
 
     public void setEnabled(boolean enabled) {
-        isEnabled = enabled;
+        this.enabled = enabled;
     }
 
-    @Override
-    public String toString() {
-        return "User{" +
-                "uuid='" + uuid + '\'' +
-                ", username='" + username + '\'' +
-                ", password='" + password + '\'' +
-                ", grantedAuthorities=" + grantedAuthorities +
-                ", isEnabled=" + isEnabled +
-                ", isAccountNonExpired=" + isAccountNonExpired +
-                ", isAccountNonLocked=" + isAccountNonLocked +
-                ", isCredentialsNonExpired=" + isCredentialsNonExpired +
-                '}';
-    }
 }
