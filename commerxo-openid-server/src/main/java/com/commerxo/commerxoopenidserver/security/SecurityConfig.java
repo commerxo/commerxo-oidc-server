@@ -22,6 +22,7 @@ import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.server.resource.authentication.*;
 import org.springframework.security.provisioning.InMemoryUserDetailsManager;
+import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 
 import java.util.Collection;
@@ -105,7 +106,7 @@ public class SecurityConfig {
                 .roles("WRITER")
                 .authorities("FULL")
                 .build();
-        return new InMemoryUserDetailsManager(userDetails);
+         return new InMemoryUserDetailsManager(userDetails);
     }
 
 }

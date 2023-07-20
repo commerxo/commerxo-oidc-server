@@ -1,17 +1,8 @@
 package com.commerxo.commerxoblogservice.domain;
 
-
-import jakarta.persistence.*;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedBy;
-import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.data.jpa.domain.support.AuditingEntityListener;
-
 import java.util.Date;
 
-@MappedSuperclass
-@EntityListeners(AuditingEntityListener.class)
+
 public abstract class Auditable<U> {
 
     private U createdBy;
@@ -22,7 +13,6 @@ public abstract class Auditable<U> {
 
     private Date lastModifiedDate;
 
-    @CreatedBy
     public U getCreatedBy() {
         return createdBy;
     }
@@ -31,9 +21,6 @@ public abstract class Auditable<U> {
         this.createdBy = createdBy;
     }
 
-    @CreatedDate
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "created_at")
     public Date getCreationDate() {
         return creationDate;
     }
@@ -42,7 +29,6 @@ public abstract class Auditable<U> {
         this.creationDate = creationDate;
     }
 
-    @LastModifiedBy
     public U getLastModifiedBy() {
         return lastModifiedBy;
     }
@@ -51,9 +37,6 @@ public abstract class Auditable<U> {
         this.lastModifiedBy = lastModifiedBy;
     }
 
-    @LastModifiedDate
-    @Temporal(TemporalType.TIMESTAMP)
-    @Column(name = "updated_at")
     public Date getLastModifiedDate() {
         return lastModifiedDate;
     }

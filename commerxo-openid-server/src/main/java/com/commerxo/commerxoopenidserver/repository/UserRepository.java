@@ -1,12 +1,13 @@
 package com.commerxo.commerxoopenidserver.repository;
 
-import com.commerxo.commerxoopenidserver.domain.User;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
+import com.commerxo.commerxoopenidserver.models.User;
 
-@Repository
-public interface UserRepository extends JpaRepository<User, String> {
+public interface UserRepository {
+
     User findByUsername(String username);
 
+    void save(User user);
+
+    User findById(String id);
 
 }

@@ -1,14 +1,13 @@
 package com.commerxo.commerxoopenidserver.repository;
 
-import com.commerxo.commerxoopenidserver.domain.UserGroup;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import com.commerxo.commerxoopenidserver.models.UserGroup;
 
-import java.util.Optional;
+public interface UserGroupRepository {
 
-@Repository
-public interface UserGroupRepository extends JpaRepository<UserGroup, String> {
+    void save(UserGroup group);
 
-    Optional<UserGroup> findByGroupName(String groupName);
+    UserGroup findByGroupName(String name);
+
+    void delete(UserGroup group);
+
 }

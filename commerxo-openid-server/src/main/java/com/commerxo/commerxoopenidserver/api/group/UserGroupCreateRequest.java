@@ -1,16 +1,17 @@
 package com.commerxo.commerxoopenidserver.api.group;
 
-import com.commerxo.commerxoopenidserver.domain.UserGroup;
-import org.springframework.security.core.GrantedAuthority;
+import com.commerxo.commerxoopenidserver.models.UserGroup;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 
-import java.util.*;
+import java.util.Set;
+import java.util.stream.Collectors;
 
-public class UserGroupCreationRequest {
+public class UserGroupCreateRequest {
 
     private String groupName;
     private String description;
     private Set<String> authorities;
+    private boolean enabled;
 
     public String getGroupName() {
         return groupName;
@@ -36,19 +37,21 @@ public class UserGroupCreationRequest {
         this.authorities = authorities;
     }
 
-    public static UserGroup mapToEntity(UserGroupCreationRequest request){
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
+    }
+
+    public static UserGroup mapToUserGroup(UserGroupCreateRequest request){
         UserGroup group = new UserGroup();
         group.setGroupName(request.getGroupName());
         group.setDescription(request.getDescription());
-        group.setGroupAuthorities(grantedAuthorities(request.getAuthorities()));
+        group.setEnabled(false);
+        group.setGroupAuthorities(request.getAuthorities().stream().map(SimpleGrantedAuthority::new).collect(Collectors.toSet()));
         return group;
     }
 
-    private static Set<GrantedAuthority> grantedAuthorities(Set<String> authorities){
-        Set<GrantedAuthority> grantedAuthorities = new HashSet<>(authorities.size());
-        for(String authority: authorities){
-            grantedAuthorities.add(new SimpleGrantedAuthority(authority));
-        }
-        return grantedAuthorities;
-    }
 }

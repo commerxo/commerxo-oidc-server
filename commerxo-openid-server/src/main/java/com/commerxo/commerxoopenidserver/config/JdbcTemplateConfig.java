@@ -3,6 +3,8 @@ package com.commerxo.commerxoopenidserver.config;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.support.JdbcDaoSupport;
+import org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl;
 
 import javax.sql.DataSource;
 
@@ -17,7 +19,9 @@ public class JdbcTemplateConfig {
 
     @Bean
     public JdbcTemplate jdbcTemplate(){
+        //        jdbcTemplate.setExceptionTranslator(new CustomSQLErrorCodeTranslator());
         return new JdbcTemplate(dataSource);
     }
+
 
 }

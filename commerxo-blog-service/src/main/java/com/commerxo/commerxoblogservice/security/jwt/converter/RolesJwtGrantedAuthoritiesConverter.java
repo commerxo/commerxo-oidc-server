@@ -1,4 +1,4 @@
-package com.commerxo.commerxoblogservice.security;
+package com.commerxo.commerxoblogservice.security.jwt.converter;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.lang.Nullable;

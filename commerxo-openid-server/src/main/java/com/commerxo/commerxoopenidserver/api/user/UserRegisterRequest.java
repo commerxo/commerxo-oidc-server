@@ -1,11 +1,9 @@
 package com.commerxo.commerxoopenidserver.api.user;
 
-import com.commerxo.commerxoopenidserver.domain.User;
+import com.commerxo.commerxoopenidserver.models.User;
+import org.springframework.util.StringUtils;
 
-import java.time.Instant;
-import java.util.Date;
-
-public class UserCreationRequest {
+public class UserRegisterRequest {
 
     private String username;
     private String password;
@@ -35,12 +33,18 @@ public class UserCreationRequest {
         this.emailId = emailId;
     }
 
-    public static User mapToEntity(UserCreationRequest request){
+    public static User mapToUser(UserRegisterRequest registerRequest){
         User user = new User();
-        user.setCreatedAt(new Date());
-        user.setUsername(request.getUsername());
-        user.setPassword(request.getPassword());
-        user.setEmailId(request.getEmailId());
+
         return user;
     }
+
+    private static void validateRequest(UserRegisterRequest request){
+        if(!StringUtils.hasText(request.getUsername()))
+            throw new IllegalArgumentException();
+        if(!StringUtils.hasText(request.getPassword()))
+            throw new IllegalArgumentException("");
+    }
+
+
 }
