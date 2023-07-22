@@ -30,16 +30,16 @@ public class UserGroupRepositoryImpl extends BaseRepositoryImpl<UserGroup> imple
             + "description, "
             + "is_enabled , "
             + "created_at , "
-//            + "created_by , "
-            + "updated_at  ";
-//            + "updated_by   ";
+            + "created_by , "
+            + "updated_at , "
+            + "updated_by   ";
 
-    private static final String GROUP_INSERT_COLUMNS = "id, "
+    private static final String GROUP_INSERT_COLUMNS = "id ,"
             + "group_name ,"
             + "description ,"
-            + "is_enabled ";
-//            + "created_by ,"
-//            + "updated_by ";
+            + "is_enabled ,"
+            + "created_by ,"
+            + "updated_by ";
 
     private static final String PK_FILTER = "id = ?";
 
@@ -85,13 +85,13 @@ public class UserGroupRepositoryImpl extends BaseRepositoryImpl<UserGroup> imple
 
     private void insertNewGroup(UserGroup group){
         this.saveOrUpdate(
-            GROUP_INSERT_COLUMNS, (ps) ->{
+            GROUP_INSERT_SQL, (ps) ->{
                     ps.setString(1, group.getId());
                     ps.setString(2, group.getGroupName());
                     ps.setString(3, group.getDescription());
-                    ps.setBoolean(4,false);
-//                    ps.setString(5, group.getCreatedBy());
-//                    ps.setString(6, group.getUpdatedBy());
+                    ps.setBoolean(4, group.isEnabled());
+                    ps.setString(5, group.getCreatedBy());
+                    ps.setString(6, group.getUpdatedBy());
             }
         );
     }
@@ -125,10 +125,14 @@ public class UserGroupRepositoryImpl extends BaseRepositoryImpl<UserGroup> imple
         public UserGroup mapRow(ResultSet rs, int rowNum) throws SQLException {
             Timestamp createdAt = rs.getTimestamp("created_at");
             Timestamp updatedAt = rs.getTimestamp("updated_at");
+            String createdBy = rs.getString("created_by");
+            String updatedBy = rs.getString("updated_by");
             UserGroup groupResult = new UserGroup();
             groupResult.setId(rs.getString("id"));
             groupResult.setCreatedAt(createdAt.toInstant());
             groupResult.setUpdatedAt(updatedAt.toInstant());
+            groupResult.setCreatedBy(createdBy);
+            groupResult.setUpdatedBy(updatedBy);
             groupResult.setGroupName(rs.getString("group_name"));
             groupResult.setDescription(rs.getString("description"));
             groupResult.setEnabled(rs.getBoolean("is_enabled"));

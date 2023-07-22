@@ -1,7 +1,6 @@
 package com.commerxo.commerxoopenidserver.api.user;
 
-import com.commerxo.commerxoopenidserver.models.User;
-import org.springframework.util.StringUtils;
+import java.io.Serializable;
 
 public class UserRegisterRequest {
 
@@ -13,38 +12,44 @@ public class UserRegisterRequest {
         return username;
     }
 
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
     public String getPassword() {
         return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getEmailId() {
         return emailId;
     }
 
-    public void setEmailId(String emailId) {
-        this.emailId = emailId;
+    public static Builder builder(){
+        return new Builder();
     }
 
-    public static User mapToUser(UserRegisterRequest registerRequest){
-        User user = new User();
+    public static class Builder implements Serializable{
 
-        return user;
+        private String username;
+        private String password;
+        private String emailId;
+
+        public Builder username(String username){
+            this.username = username;
+            return this;
+        }
+
+        public Builder password(String password){
+            this.password = password;
+            return this;
+        }
+
+        public Builder emailId(String emailId){
+            this.emailId = emailId;
+            return this;
+        }
+        public UserRegisterRequest build(){
+            UserRegisterRequest request = new UserRegisterRequest();
+            request.username = this.username;
+            request.password = this.password;
+            request.emailId = this.emailId;
+            return request;
+        }
     }
-
-    private static void validateRequest(UserRegisterRequest request){
-        if(!StringUtils.hasText(request.getUsername()))
-            throw new IllegalArgumentException();
-        if(!StringUtils.hasText(request.getPassword()))
-            throw new IllegalArgumentException("");
-    }
-
-
 }

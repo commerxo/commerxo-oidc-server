@@ -21,7 +21,7 @@
                         <div class="row">
                             <div class="col-md-12 pe-0">
                                 <div class="h-100 py-5 px-5">
-                                    <form th:action="@{/}" method="post" class="row g-4">
+                                    <form th:action="@{/save}" method="post" class="row g-4">
 
                                         <div th:if="${param.error}">
                                             <p class="text-danger">[[${session.SPRING_SECURITY_LAST_EXCEPTION.message}]]</p>

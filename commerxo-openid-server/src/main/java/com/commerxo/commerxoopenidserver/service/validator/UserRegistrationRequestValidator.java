@@ -17,6 +17,9 @@ public class UserRegistrationRequestValidator implements Consumer<UserRegisterRe
         if(!StringUtils.hasText(request.getPassword()))
             throw new IllegalArgumentException("Password can't be empty!");
 
+        if(!StringUtils.hasText(request.getEmailId()))
+            throw new IllegalArgumentException("EmailId can't be empty!");
+
     }
 
 }

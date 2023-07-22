@@ -3,33 +3,27 @@ package com.commerxo.commerxoopenidserver.repository;
 import com.commerxo.commerxoopenidserver.models.User;
 import com.commerxo.commerxoopenidserver.repository.impl.UserRepositoryImpl;
 import org.junit.jupiter.api.*;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabase;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseBuilder;
-import org.springframework.jdbc.datasource.embedded.EmbeddedDatabaseType;
 
-import java.io.IOException;
+import java.time.Instant;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.UUID;
 
-public class UserRepositoryTest {
+public class UserRepositoryTest extends AuthorizationRepositoryJunit {
 
-    private static final String USER_SCHEMA = "/schema/user.sql";
+    private static final String SCHEMA = "/schema/user.sql";
 
-
-    private EmbeddedDatabase db;
-    private JdbcTemplate jdbcTemplate;
     private UserRepositoryImpl userRepository;
 
     @BeforeEach
-    public void setUp() throws IOException {
-        this.db = createDB(USER_SCHEMA);
-        this.jdbcTemplate = new JdbcTemplate(this.db);
-        this.userRepository = new UserRepositoryImpl(this.jdbcTemplate);
+    public void init() {
+        super.init();
+        this.userRepository = new UserRepositoryImpl(this.getJdbcTemplate());
     }
 
     @AfterEach
     public void destroy(){
-        this.db.shutdown();
+        this.getDb().shutdown();
     }
 
     @Test
@@ -41,12 +35,19 @@ public class UserRepositoryTest {
     public void findByIdWhenIdIsNull(){
         Assertions.assertNull(this.userRepository.findById(null));
     }
+    
+    @Test
+    public void saveNewUserAndFindByWrongUsername(){
+        User newUser = createUser().build();
+        this.userRepository.insert(newUser);
+        User savedUser = this.userRepository.findByUsername("fake_username");
+        Assertions.assertNull(savedUser);
 
-
+    }
     @Test
     public void saveNewUserAndFindByUsername(){
         User newUser = createUser().build();
-        this.userRepository.save(newUser);
+        this.userRepository.insert(newUser);
         User savedUser = this.userRepository.findByUsername(newUser.getUsername());
         Assertions.assertEquals(newUser.getId(), savedUser.getId());
         Assertions.assertEquals(newUser.getUsername(), savedUser.getUsername());
@@ -58,26 +59,45 @@ public class UserRepositoryTest {
         Assertions.assertFalse(savedUser.isCredentialsExpired());
     }
 
+    @Test
+    public void saveNewUserAndFindByUsernameAndUpdate() {
+        User newUser = createUser().build();
+        this.userRepository.insert(newUser);
+        User savedUser = this.userRepository.findByUsername(newUser.getUsername());
+        User updatedUser = User.from(savedUser)
+                .username("new_username")
+                .createdAt(Instant.now())
+                .password("test_password")
+                .enabled(true)
+                .accountExpired(true)
+                .accountLocked(true)
+                .credentialsExpired(true)
+                .build();
+        this.userRepository.update(updatedUser);
+        savedUser = this.userRepository.findByUsername(newUser.getUsername());
+        Assertions.assertEquals(newUser.getId(), savedUser.getId());
+        Assertions.assertEquals(newUser.getUsername(), savedUser.getUsername());
+        Assertions.assertEquals(updatedUser.getPassword(), savedUser.getPassword());
+        Assertions.assertEquals(newUser.getEmailId(), savedUser.getEmailId());
+        Assertions.assertTrue(savedUser.isAccountExpired());
+        Assertions.assertTrue(savedUser.isEnabled());
+        Assertions.assertTrue(savedUser.isAccountLocked());
+        Assertions.assertTrue(savedUser.isCredentialsExpired());
+    }
+
     private User.Builder createUser(){
         return User
                 .withId(UUID.randomUUID().toString())
                 .username("test")
                 .password("password")
+                .createdAt(Instant.now())
+                .updatedAt(Instant.now())
                 .emailId("email@test.com");
     }
 
-    @Test
-    public void test(){
-        Assertions.assertTrue(true);
+    @Override
+    Collection<String> getSchemas() {
+        return Collections.singleton(SCHEMA);
     }
 
-
-    private EmbeddedDatabase createDB(String schema){
-        return new EmbeddedDatabaseBuilder()
-                .generateUniqueName(true)
-                .setType(EmbeddedDatabaseType.HSQL)
-                .setScriptEncoding("UTF-8")
-                .addScript(schema)
-                .build();
-    }
 }
